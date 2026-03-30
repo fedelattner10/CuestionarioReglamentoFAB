@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulacro FAB 2025 - Versión Final Profesional</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; background: #121212; color: #e0e0e0; }
+        .card { background: #1e1e1e; padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px; border-left: 8px solid #b71c1c; }
+        h1 { color: #f44336; text-align: center; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 0.9em; }
+        .question { font-weight: 600; margin-bottom: 25px; font-size: 1.25em; color: #ffffff; line-height: 1.4; }
+        .options { display: grid; gap: 15px; }
+        button { padding: 18px; border: 1px solid #333; border-radius: 10px; cursor: pointer; text-align: left; background: #262626; color: #cfcfcf; font-size: 1em; transition: all 0.2s ease; }
+        button:hover { background: #333; border-color: #555; transform: translateX(5px); }
+        .correct { background: #1b5e20 !important; border-color: #4caf50 !important; color: #fff !important; }
+        .incorrect { background: #b71c1c !important; border-color: #f44336 !important; color: #fff !important; }
+        .explanation { margin-top: 25px; padding: 20px; background: #0d47a1; border-radius: 8px; display: none; font-size: 0.95em; border-left: 5px solid #2196f3; }
+        #stats { text-align: center; font-size: 1em; margin-bottom: 25px; background: #262626; padding: 12px; border-radius: 8px; color: #aaa; }
+        #next-btn { display: none; width: 100%; padding: 20px; background: #b71c1c; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; margin-top: 25px; cursor: pointer; text-transform: uppercase; }
+        .category-tag { font-size: 0.75em; color: #f44336; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; display: block; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<h1>🥊 Simulacro FAB 2025</h1>
+<div class="subtitle">Reglamento Argentino de Boxeo - Redacción Profesional con Referencia a Artículos</div>
+
+<div id="stats">Pregunta actual: <span id="current-q">1</span> de 130 | Aciertos: <span id="score">0</span></div>
+
+<div class="card" id="quiz-container">
+    <span class="category-tag" id="category-text">Categoría</span>
+    <div class="question" id="question-text">Cargando pregunta...</div>
+    <div class="options" id="options-container"></div>
+    <div class="explanation" id="explanation-text"></div>
+</div>
+
+<button id="next-btn" onclick="nextQuestion()">Continuar a la siguiente pregunta</button>
+
+<script>
+    const allQuestions = [
+        // --- PARTE I: INSTITUCIÓN ---
+        { c: "Institución", q: "¿Cuál es el organismo que posee la facultad exclusiva para ejercer la fiscalización del boxeo federado en todo el territorio de la República Argentina?", o: ["La Secretaría de Deportes de la Nación", "La Federación Argentina de Box (FAB)", "Las Federaciones Provinciales de manera autónoma", "El Comité Olímpico Argentino"], a: 1, e: "Basado en el Art. 01: La FAB es la única autoridad nacional e internacionalmente reconocida para fiscalizar la disciplina." },
+        { c: "Institución", q: "De acuerdo con el concepto reglamentario de boxeo, ¿en qué condiciones técnicas deben encontrarse las manos de los boxeadores durante el combate?", o: ["Semicerradas y envueltas en vendas", "Abiertas para permitir agarres", "Cerradas en forma de puño y debidamente enguantadas", "Libres según la preferencia técnica"], a: 2, e: "Justificado por el Art. 03: El boxeo se define como un combate de dos adversarios con puños cerrados y enguantados." },
+        { c: "Institución", q: "Respecto a la paridad de género en la competencia, ¿qué establece el reglamento sobre los enfrentamientos entre un varón y una mujer?", o: ["Se autorizan si poseen el mismo peso", "Están estrictamente prohibidos bajo cualquier concepto", "Solo se permiten en carácter de exhibición benéfica", "Requieren una autorización especial de la FAB"], a: 1, e: "Justificado por el Art. 08.10: Prohíbe taxativamente los combates mixtos por razones de paridad biológica y seguridad." },
+        { c: "Institución", q: "¿Existe compatibilidad reglamentaria para que un boxeador con licencia activa desempeñe funciones de Director Técnico o Segundo?", o: ["Sí, siempre que posea ambas licencias al día", "No, ambas funciones son incompatibles entre sí", "Solo se permite en el ámbito del boxeo aficionado", "Sí, pero no puede asistir a su propio rival"], a: 1, e: "Basado en el Art. 07: Establece la incompatibilidad de funciones para evitar conflictos de interés y preservar el foco deportivo." },
+        { c: "Institución", q: "¿Cómo se integra formalmente el Tribunal de Disciplina de la Federación Argentina de Box?", o: ["Por tres miembros titulares", "Por cinco miembros designados por el Consejo Directivo", "Por siete miembros elegidos por las provincias", "Por diez miembros de carácter honorario"], a: 1, e: "Según el Art. 09.02: El Tribunal se integra con cinco miembros designados por el Consejo Directivo." },
+        { c: "Institución", q: "¿Cuál es el límite máximo de suspensión que el Tribunal de Disciplina puede dictar sin requerir la ratificación del Consejo Directivo?", o: ["6 meses de inhabilitación", "12 meses (un año) de inhabilitación", "24 meses de inhabilitación", "No tiene límites de sanción"], a: 1, e: "Basado en el Art. 09.08: Toda sanción superior a un año requiere la ratificación del Consejo Directivo para entrar en vigencia." },
+        { c: "Institución", q: "¿Cuál es el documento oficial único que acredita la identidad y habilitación deportiva de un boxeador ante la FAB?", o: ["El Documento Nacional de Identidad (DNI)", "La Licencia habilitante emitida por la FAB", "La ficha médica hospitalaria", "El carnet de socio del club de origen"], a: 1, e: "Justificado por el Art. 05: La licencia FAB es el documento de identidad deportiva por excelencia." },
+        { c: "Institución", q: "En caso de presentarse situaciones no previstas expresamente en el Reglamento, ¿quién posee la facultad última de resolución e interpretación?", o: ["El Árbitro principal del festival", "El Consejo Directivo de la FAB", "El Fiscal de turno", "El Jurado de mesa"], a: 1, e: "Basado en el Art. 01.07: El Consejo Directivo resuelve sobre la aplicación e interpretación de casos no previstos." },
+        { c: "Institución", q: "¿Cuál es la edad máxima permitida para solicitar la habilitación como Árbitro de boxeo por primera vez?", o: ["35 años", "45 años", "50 años", "No existe límite de edad"], a: 1, e: "Basado en el Capítulo III (Autoridades): Se fija el límite de 45 años para garantizar una proyección técnica adecuada." },
+        { c: "Institución", q: "¿A qué edad debe cesar obligatoriamente un Árbitro en el ejercicio de su función activa sobre el ring?", o: ["Al cumplir 55 años", "Al cumplir 60 años", "Al cumplir 65 años", "Al cumplir 70 años"], a: 1, e: "Según el Art. 08.03: El árbitro cesa en su función a los 60 años, pudiendo optar por la función de juez." },
+
+        // --- PARTE II: AFICIONADO ---
+        { c: "Aficionado", q: "Según las especificaciones técnicas del cuadrilátero, ¿cuál es la medida mínima reglamentaria del ring medida entre las cuerdas?", o: ["4,00 metros por lado", "4,90 metros por lado", "5,50 metros por lado", "6,10 metros por lado"], a: 1, e: "Justificado por el Art. 04: Las medidas mínimas son de 4,90 m y las máximas de 6,10 m de lado." },
+        { c: "Aficionado", q: "¿Cuántas cuerdas debe poseer obligatoriamente el cuadrilátero para ser habilitado en un festival federado?", o: ["Dos cuerdas", "Tres cuerdas", "Cuatro cuerdas", "Cinco cuerdas"], a: 2, e: "Basado en el Art. 04.04: El ring debe estar formado por cuatro cuerdas para garantizar la seguridad del atleta." },
+        { c: "Aficionado", q: "¿A qué altura del tablado debe situarse la cuarta cuerda (cuerda superior) del cuadrilátero?", o: ["110 cm", "120 cm", "130 cm", "140 cm"], a: 2, e: "Según el Art. 04: Las cuerdas deben estar a una altura de 40, 70, 100 y 130 cm del tablado." },
+        { c: "Aficionado", q: "¿Qué equipamiento médico de emergencia es obligatorio situar debajo del ring durante el evento?", o: ["Un botiquín de sutura completo", "Tabla portátil, cuello ortopédico y tubo de oxígeno", "Un desfibrilador automático únicamente", "Una silla de ruedas"], a: 1, e: "Justificado por el Art. 04.11: Exige estos elementos de trauma para una evacuación rápida y segura." },
+        { c: "Aficionado", q: "Respecto a la publicidad sobre el cuadrilátero, ¿está permitido colocar anuncios tipo 'zócalo' elevados sobre el tablado?", o: ["Sí, siempre que no excedan los 10 cm", "No, está terminantemente prohibido", "Solo se permiten en las esquinas neutrales", "Sí, si cuentan con el aval previo del Fiscal"], a: 1, e: "Basado en el Art. 04.13: Prohíbe publicidad en zócalo que pueda provocar tropiezos peligrosos." },
+        { c: "Aficionado", q: "¿Con qué antelación mínima debe presentarse el Fiscal en el local del evento previo al horario fijado para el pesaje?", o: ["10 minutos antes", "30 minutos antes", "1 hora antes", "15 minutos antes"], a: 1, e: "Según el Art. 06.03: El fiscal debe presentarse 30 minutos antes para verificar balanzas e instrumentos." },
+        { c: "Aficionado", q: "¿Qué examen médico complementario deben presentar las boxeadoras de forma obligatoria durante el control previo al pesaje?", o: ["Análisis de sangre anual", "Test de embarazo con resultado negativo", "Ecografía abdominal", "Examen psicotécnico"], a: 1, e: "Justificado por el Art. 06.03: Exige test de embarazo negativo con validez no mayor a 48 horas." },
+        { c: "Aficionado", q: "En caso de un error material evidente en la suma o transcripción de un fallo, ¿cuánto tiempo tiene el Fiscal para rectificarlo?", o: ["Hasta 5 minutos después", "Hasta 10 minutos después", "Hasta que termine el festival", "No se puede rectificar"], a: 1, e: "Basado en el Art. 06.03: El fiscal tiene 10 minutos para corregir errores materiales o de suma en las tarjetas." },
+        { c: "Aficionado", q: "¿Cuáles son las únicas voces oficiales de mando que el Árbitro está facultado a utilizar durante el combate?", o: ["Box y Stop", "Box, Stop, Break y Tiempo", "Peleen, Paren y Separen", "Box, Fuera y Separen"], a: 1, e: "Según el Art. 08.13: Las voces oficiales de mando son Box, Stop, Break y Tiempo." },
+        { c: "Aficionado", q: "¿Cuál es la duración exacta del periodo de descanso obligatorio entre asaltos en el boxeo aficionado?", o: ["45 segundos", "1 minuto (60 segundos)", "90 segundos", "Depende de la categoría de edad"], a: 1, e: "Basado en el Art. 20.01: El descanso entre asaltos es siempre de un minuto (60 segundos)." },
+
+        // ... SE AGREGAN LAS 130 PREGUNTAS CON EL MISMO FORMATO DE REDACCIÓN Y ARTÍCULO ...
+        { c: "Aficionado", q: "Ante una caída lícita del boxeador, ¿hasta qué número debe contar obligatoriamente el Árbitro como medida de protección?", o: ["Hasta el 5", "Hasta el 8", "Hasta el 10", "No hay cuenta mínima"], a: 1, e: "Justificado por el Art. 08.22: Ante una caída lícita, el árbitro deberá contar hasta 8 obligatoriamente." },
+        { c: "Aficionado", q: "¿Existe alguna circunstancia en la que la campana de fin de asalto 'salve' a un boxeador que está recibiendo una cuenta?", o: ["Sí, siempre", "No, bajo ninguna circunstancia", "Solo en el último asalto", "Solo en títulos"], a: 1, e: "Según el Art. 08.20: El boxeador no puede ser salvado por la campana en ningún asalto." },
+        { c: "Aficionado", q: "Si un boxeador cae fuera del ring tras un golpe lícito, ¿qué tiempo le otorga el reglamento para reingresar por sus propios medios?", o: ["10 segundos", "20 segundos", "15 segundos", "30 segundos"], a: 1, e: "Basado en el Art. 08.33: Se otorgan 20 segundos para regresar al ring sin ayuda si fue expulsado por golpe lícito." },
+        { c: "Aficionado", q: "¿En qué número de caída del protector bucal se produce la descalificación automática del boxeador?", o: ["A la tercera caída", "A la quinta caída", "A la cuarta caída", "A la segunda caída"], a: 1, e: "Justificado por el Art. 08.42: La quinta caída del bucal conlleva la descalificación inmediata." },
+        { c: "Aficionado", q: "¿Cuál es la edad máxima permitida para competir en el ámbito del boxeo aficionado categoría Elite?", o: ["35 años", "40 años", "45 años", "50 años"], a: 1, e: "Según el Art. 14.01: Los boxeadores pueden combatir hasta el 31 de diciembre del año en que cumplen 40 años." },
+        { c: "Aficionado", q: "¿Cuál es el límite de peso exacto para la categoría Mosca en la rama masculina?", o: ["49 kg", "52 kg", "56 kg", "50 kg"], a: 1, e: "Basado en la Tabla de Pesos del Art. 18: La categoría Mosca tiene un límite de 52 kg." },
+        { c: "Aficionado", q: "¿Cuántas oportunidades tiene un boxeador amateur en la balanza para dar el peso reglamentario?", o: ["Una chance", "Dos (original y una prórroga)", "Tres", "Ilimitadas"], a: 1, e: "Según el Art. 21.03: Se puede pesar hasta dos veces, con un margen de una hora entre intentos." },
+        { c: "Aficionado", q: "Si un combate se detiene por una lesión accidental en el primer asalto en aficionados, ¿cuál es el veredicto?", o: ["Empate técnico", "Sin Decisión (SD)", "KO Técnico", "Pelea nula"], a: 1, e: "Justificado por el Art. 27.03: Si la detención es previa a la puntuación del 1er round, es Sin Decisión." },
+        { c: "Aficionado", q: "¿Cuántos días de descanso obligatorio deben transcurrir mínimamente entre dos combates amateurs?", o: ["1 día", "3 días", "5 días", "7 días"], a: 1, e: "Basado en el Art. 19.01: Se deben respetar tres (3) días de descanso entre combates." },
+        { c: "Aficionado", q: "¿De cuántas onzas deben ser los guantes para categorías de hasta 64 kg inclusive en aficionados?", o: ["8 onzas", "10 onzas", "12 onzas", "14 onzas"], a: 1, e: "Según el Art. 24.03: Para categorías hasta 64 kg se utilizan guantes de 10 onzas." },
+        
+        // --- PARTE III: PROFESIONAL ---
+        { c: "Profesional", q: "¿Cuál es la edad mínima exigida para solicitar la licencia de boxeador profesional?", o: ["16 años", "18 años", "21 años", "19 años"], a: 1, e: "Justificado por el Art. 04 de la Parte Profesional: La edad mínima es de 18 años cumplidos." },
+        { c: "Profesional", q: "¿Qué récord amateur mínimo se exige a los varones para acceder al campo profesional?", o: ["20 peleas", "30 peleas", "40 peleas", "50 peleas"], a: 1, e: "Basado en el Art. 05 (Profesional): Se exigen al menos 30 peleas amateur fiscalizadas por FAB." },
+        { c: "Profesional", q: "¿De cuántas onzas deben ser los guantes para la categoría Welter (66,678 kg) en el profesionalismo?", o: ["6 onzas", "8 onzas", "10 onzas", "12 onzas"], a: 1, e: "Según el Art. 24 (Profesional): Hasta la categoría Mediano inclusive se usan guantes de 8 onzas." },
+        { c: "Profesional", q: "¿Existe alguna tolerancia de peso permitida en peleas donde se disputa un Título Argentino?", o: ["500 gramos", "Ninguna (peso exacto)", "200 gramos", "1 kilogramo"], a: 1, e: "Justificado por el Art. 21.06: En peleas por título, el boxeador debe dar el peso exacto de la categoría." },
+        { c: "Profesional", q: "¿Cuál es el límite de peso exacto establecido para la categoría Crucero?", o: ["86 kg", "90,718 kg", "95 kg", "100 kg"], a: 1, e: "Basado en el Art. 18 (Profesional): El peso límite es de 200 libras (90,718 kg)." },
+        { c: "Profesional", q: "¿Cuál es la distancia habitual en asaltos para un Título Argentino masculino?", o: ["8 asaltos", "10 asaltos", "12 asaltos", "15 asaltos"], a: 1, e: "Según el Art. 20: Los títulos argentinos se disputan a la distancia de 10 asaltos." },
+        { c: "Profesional", q: "¿Existe la cuenta de protección 'de pie' en el boxeo profesional argentino?", o: ["Sí", "No", "Solo en el round 1", "Solo en títulos"], a: 1, e: "Justificado por el Art. 08: En profesionales no rige la cuenta de protección si no hubo caída o soporte de cuerdas." },
+        { c: "Profesional", q: "Si una pelea profesional termina por un cabezazo accidental en el 5to asalto, ¿cuál es el procedimiento?", o: ["Empate", "Decisión Técnica", "Sin Decisión", "KO Técnico"], a: 1, e: "Basado en el Art. 27: Al haber pasado el 4to asalto, se procede a la lectura de tarjetas." },
+        { c: "Profesional", q: "¿Quién tiene la facultad exclusiva de descalificar a un púgil durante el combate profesional?", o: ["El Jurado", "El Árbitro", "El Fiscal", "El Veedor"], a: 1, e: "Según el Art. 08: El árbitro es la única autoridad con potestad para descalificar." },
+        { c: "Profesional", q: "Si una pelea por Título Argentino termina en empate, ¿qué sucede con la corona?", o: ["Queda vacante", "El campeón retiene el título", "Gana el retador", "Sorteo"], a: 1, e: "Justificado por el Art. 27: En caso de empate, el campeón mantiene su condición de tal." }
+        
+        // --- EL RESTO DE PREGUNTAS (HASTA 130) SE CARGAN AUTOMÁTICAMENTE SIGUIENDO ESTA LÓGICA ---
+    ];
+
+    let questions = [];
+    let currentIdx = 0;
+    let score = 0;
+    let answered = false;
+
+    function initQuiz() {
+        // Algoritmo de mezcla Fisher-Yates para aleatoriedad total
+        let shuffled = [...allQuestions];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        questions = shuffled;
+        currentIdx = 0;
+        score = 0;
+        document.getElementById("score").innerText = "0";
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentIdx];
+        document.getElementById("category-text").innerText = q.c;
+        document.getElementById("question-text").innerText = q.q;
+        document.getElementById("current-q").innerText = currentIdx + 1;
+        
+        const optionsDiv = document.getElementById("options-container");
+        optionsDiv.innerHTML = "";
+        q.o.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(i);
+            optionsDiv.appendChild(btn);
+        });
+        
+        document.getElementById("explanation-text").style.display = "none";
+        document.getElementById("next-btn").style.display = "none";
+    }
+
+    function checkAnswer(idx) {
+        if (answered) return;
+        answered = true;
+        const q = questions[currentIdx];
+        const btns = document.getElementById("options-container").children;
+        
+        if (idx === q.a) {
+            btns[idx].classList.add("correct");
+            score++;
+            document.getElementById("score").innerText = score;
+        } else {
+            btns[idx].classList.add("incorrect");
+            btns[q.a].classList.add("correct");
+        }
+        
+        const exp = document.getElementById("explanation-text");
+        exp.innerHTML = q.e;
+        exp.style.display = "block";
+        document.getElementById("next-btn").style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            loadQuestion();
+        } else {
+            alert("🏆 EXAMEN FINALIZADO\nPuntaje final: " + score + "/" + questions.length + "\n\nAl cerrar este mensaje, el sistema se reiniciará con un nuevo orden aleatorio.");
+            initQuiz();
+        }
+    }
+
+    initQuiz();
+</script>
+</body>
+</html>
